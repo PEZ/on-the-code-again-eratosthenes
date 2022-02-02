@@ -90,11 +90,7 @@
   {:set {:sieve sieve
          :count-f count
          :threads 1
-         :bits "?"}
-   :vector {:sieve sieve-vector
-            :count-f (fn [primes] (count (filter true? primes)))
-            :threads 1
-            :bits 1}})
+         :bits "?"}})
 
 (defn run [{:keys [variant warm-up?]
             :or   {variant :set
@@ -110,4 +106,4 @@
   (run {:warm-up? true})
   (run {:warm-up? false})
   (run {:variant :set :warm-up? true})
-  (run {:variant :vector :warm-up? true}))
+  )
