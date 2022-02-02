@@ -37,6 +37,10 @@ The project comes equipped with some really good libraries for optimizing Clojur
 
 There are also some Calva [custom commands](https://calva.io/custom-commands/) preconfigured, for using the decompiler smoothly.
 
+Check these branches for versions of the sieving code that might have been featured in some live stream or video.
+
+* `live-stream-1`: [Live stream Feb 2, 2022](https://github.com/PEZ/on-the-code-again-eratosthenes/tree/live-stream-1)
+
 ### Using it the Clojure way (from the REPL)
 
 Generally when developing you should start the REPL with the aliases: `:benchmark`, `:decompiler`, and `:profiler`. Then just hack away. Watching some of the videos linked above might be a good start.
