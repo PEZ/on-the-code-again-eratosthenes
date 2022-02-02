@@ -80,9 +80,9 @@ If you run it on your machine(s) with `run.sh` and in Docker, you might notice t
 
 ## Thanks to my sponsors
 
-The reason I can spend focused time on Wednesdays with Calva and stuff like this is because my employer, [Agical](https://agical.se), pays me a full salary, while letting me spend 20% on my open source things.
+The reason I can spend focused time on Wednesdays with Calva and stuff like this is because my employer, [Agical](https://agical.se), pays me a full salary, while letting me spend 20% of my time on my open source things.
 
-<a href="">
+<a href="https://blog.agical.se/en">
 <img width="500" src="https://calva.io/images/agical-logo-1200x400.png"/>
 </a>
 
