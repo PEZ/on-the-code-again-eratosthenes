@@ -1,0 +1,15 @@
+pom.xml
+pom.xml.asc
+*.jar
+*.class
+/lib/
+/classes/
+/target/
+/checkouts/
+.nrepl-port
+.cpcache/
+.portal/vs-code.edn
+.lsp/.cache
+.clj-kondo/.cache
+.calva/output-window
+decompiled*.java

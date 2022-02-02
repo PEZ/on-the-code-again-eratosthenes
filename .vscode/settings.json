@@ -1,0 +1,22 @@
+{
+  "calva.customREPLCommandSnippets": [
+    {
+      "name": "Decompile current top level form",
+      "key": "d",
+      "snippet": "(require '[clj-java-decompiler.core :refer [decompile]]) (spit \"decompiled-$top-level-defined-symbol.java\" (with-out-str (decompile $top-level-form)))"
+    },
+    {
+      "name": "Decompile current form",
+      "snippet": "(require '[clj-java-decompiler.core :refer [decompile]]) (spit \"decompiled.java\" (with-out-str (decompile $current-form)))"
+    },
+    {
+      "name": "Disassemble current top level form",
+      "key": "b",
+      "snippet": "(require '[clj-java-decompiler.core :refer [disassemble]]) (spit \"bytecode-$top-level-defined-symbol.class\" (with-out-str (disassemble $top-level-form)))"
+    },
+    {
+      "name": "Disassemble current current form",
+      "snippet": "(require '[clj-java-decompiler.core :refer [disassemble]]) (spit \"bytecode.class\" (with-out-str (disassemble $current-form)))"
+    }
+  ]
+}
