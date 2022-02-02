@@ -84,16 +84,20 @@
          "Count: " (count-f primes) ", "
          "Valid: " (if valid? "True" "False")
          "\n"
-         "pez-clj-" (name variant) ";" passes ";" timef ";" threads ";algorithm=base,faithful=yes,bits=" bits)))
+         (name variant) ";" passes ";" timef ";" threads ";algorithm=base,faithful=yes,bits=" bits)))
 
 (def confs
-  {:oca {:sieve sieve
+  {:set {:sieve sieve
          :count-f count
          :threads 1
-         :bits "?"}})
+         :bits "?"}
+   :vector {:sieve sieve-vector
+            :count-f (fn [primes] (count (filter true? primes)))
+            :threads 1
+            :bits 1}})
 
 (defn run [{:keys [variant warm-up?]
-            :or   {variant :oca
+            :or   {variant :set
                    warm-up? false}}]
   (let [conf (confs variant)
         sieve (:sieve conf)]
@@ -105,5 +109,5 @@
 (comment
   (run {:warm-up? true})
   (run {:warm-up? false})
-  (run {:variant :oca :warm-up? true})
-  )
+  (run {:variant :set :warm-up? true})
+  (run {:variant :vector :warm-up? true}))
