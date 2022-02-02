@@ -23,8 +23,87 @@
   (time (count (sieve 1000000)))
   (require '[criterium.core :refer [quick-bench with-progress-reporting]])
   (quick-bench (count (sieve 1000000)))
-  (with-progress-reporting (quick-bench (count (sieve 1000000))))
-  )
+  (with-progress-reporting (quick-bench (count (sieve 1000000)))))
+
+(defn sieve-vector
+  "Using a Clojure immutable vector"
+  [n]
+  (if (< n 2)
+    []
+    (let [primes (vec (repeat (inc n) true))
+          primes (assoc primes 0 false 1 false)
+          sqrt-n (Math/ceil (Math/sqrt n))]
+      (loop [p 2
+             primes primes]
+        (if (<= p sqrt-n)
+          (if (nth primes p)
+            (recur (inc p)
+                   (loop [i (* p p)
+                          primes primes]
+                     (if (<= i n)
+                       (recur (+ i p)
+                              (assoc primes i false))
+                       primes)))
+            (recur (inc p)
+                   primes))
+          primes)))))
+
+(comment
+  (defn loot [primes]
+    (keep-indexed (fn [i v]
+                    (when v i))
+                  primes))
+  (sieve-vector 1)
+  (loot (sieve-vector 2))
+  (loot (sieve-vector 3))
+  (loot (sieve-vector 10))
+  (loot (sieve-vector 100))
+  (count (loot (sieve-vector 100)))
+  (time (do (sieve-vector 1000000) nil))
+  (time (count (loot (sieve-vector 1000000))))
+  (require '[criterium.core :refer [quick-bench with-progress-reporting]])
+  (with-progress-reporting (quick-bench (sieve-vector 1000000))))
+
+(defn sieve-vector
+  "Using a Clojure immutable vector"
+  [n]
+  (if (< n 2)
+    []
+    (let [half-n (/ n 2)
+          sqrt-n (long (Math/ceil (Math/sqrt n)))]
+      (loop [p 3
+             primes (vec (repeat half-n true))]
+        (if (< p sqrt-n)
+          (if (nth primes (/ p 2))
+            (recur (+ p 2)
+                   (loop [i (int (/ (* p p) 2))
+                          primes primes]
+                     (if (< i half-n)
+                       (recur (+ i p)
+                              (assoc primes i false))
+                       primes)))
+            (recur (+ p 2)
+                   primes))
+          primes)))))
+
+(comment
+  (defn loot [primes]
+    (keep-indexed (fn [i v]
+                    (if (zero? i)
+                      2
+                      (when v (inc (* i 2)))))
+                  primes))
+  (sieve-vector 1)
+  (loot (sieve-vector 2))
+  (loot (sieve-vector 5))
+  (loot (sieve-vector 10))
+  (loot (sieve-vector 100))
+  (count (loot (sieve-vector 100)))
+  (time (do (sieve-vector 1000000) nil))
+  (time (count (loot (sieve-vector 1000000))))
+  (require '[criterium.core :refer [quick-bench with-progress-reporting]])
+  (with-progress-reporting (quick-bench (sieve-vector 1000000))))
+
 
 (comment
   (require '[clj-async-profiler.core :as prof])
@@ -84,16 +163,20 @@
          "Count: " (count-f primes) ", "
          "Valid: " (if valid? "True" "False")
          "\n"
-         "pez-clj-" (name variant) ";" passes ";" timef ";" threads ";algorithm=base,faithful=yes,bits=" bits)))
+         (name variant) ";" passes ";" timef ";" threads ";algorithm=base,faithful=yes,bits=" bits)))
 
 (def confs
-  {:oca {:sieve sieve
+  {:set {:sieve sieve
          :count-f count
          :threads 1
-         :bits "?"}})
+         :bits "?"}
+   :vector {:sieve sieve-vector
+            :count-f (fn [primes] (count (filter true? primes)))
+            :threads 1
+            :bits 1}})
 
 (defn run [{:keys [variant warm-up?]
-            :or   {variant :oca
+            :or   {variant :set
                    warm-up? false}}]
   (let [conf (confs variant)
         sieve (:sieve conf)]
@@ -105,5 +188,5 @@
 (comment
   (run {:warm-up? true})
   (run {:warm-up? false})
-  (run {:variant :oca :warm-up? true})
-  )
+  (run {:variant :set :warm-up? true})
+  (run {:variant :vector :warm-up? true}))
