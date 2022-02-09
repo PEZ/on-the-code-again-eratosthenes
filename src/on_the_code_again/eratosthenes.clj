@@ -64,6 +64,9 @@
   (require '[criterium.core :refer [quick-bench with-progress-reporting]])
   (with-progress-reporting (quick-bench (sieve-vector 1000000))))
 
+(set! *warn-on-reflection* true)
+(set! *unchecked-math* false)
+
 (defn sieve-vector
   "Using a Clojure immutable vector"
   [n]
@@ -104,13 +107,122 @@
   (require '[criterium.core :refer [quick-bench with-progress-reporting]])
   (with-progress-reporting (quick-bench (sieve-vector 1000000))))
 
+(defn sieve-vector-transient
+  "Using a Clojure transient vector"
+  [n]
+  (if (< n 2)
+    []
+    (let [half-n (/ n 2)
+          sqrt-n (long (Math/ceil (Math/sqrt n)))
+          primes (transient (vec (repeat half-n true)))]
+      (loop [p 3]
+        (when (< p sqrt-n)
+          (when (nth primes (/ p 2))
+            (loop [i (int (/ (* p p) 2))]
+              (when (< i half-n)
+                (assoc! primes i false)
+                (recur (+ i p)))))
+          (recur (+ p 2))))
+      (persistent! primes))))
+
+(comment
+  (defn loot [primes]
+    (keep-indexed (fn [i v]
+                    (if (zero? i)
+                      2
+                      (when v (inc (* i 2)))))
+                  primes))
+  (sieve-vector-transient 1)
+  (loot (sieve-vector-transient 2))
+  (loot (sieve-vector-transient 5))
+  (loot (sieve-vector-transient 10))
+  (loot (sieve-vector-transient 100))
+  (count (loot (sieve-vector-transient 100)))
+  (time (do (sieve-vector-transient 1000000) nil))
+  (time (count (loot (sieve-vector-transient 1000000))))
+  (require '[criterium.core :refer [quick-bench with-progress-reporting]])
+  (with-progress-reporting (quick-bench (sieve-vector-transient 1000000))))
+
+(set! *unchecked-math* true)
+
+(defn sieve-boolean-array
+  "Using a Java array of `boolean`s vector"
+  [n]
+  (if (< n 2)
+    []
+    (let [half-n (/ n 2)
+          sqrt-n (long (Math/ceil (Math/sqrt n)))
+          primes (boolean-array half-n true)]
+      (loop [p 3]
+        (when (< p sqrt-n)
+          (when (aget primes (/ p 2))
+            (loop [i (int (/ (* p p) 2))]
+              (when (< i half-n)
+                (aset primes i false)
+                (recur (+ i p)))))
+          (recur (+ p 2))))
+      primes)))
+
+(comment
+  (defn loot [primes]
+    (keep-indexed (fn [i v]
+                    (if (zero? i)
+                      2
+                      (when-not v (inc (* i 2)))))
+                  primes))
+  (sieve-boolean-array 1)
+  (loot (sieve-boolean-array 2))
+  (loot (sieve-boolean-array 5))
+  (loot (sieve-boolean-array 10))
+  (loot (sieve-boolean-array 100))
+  (count (loot (sieve-boolean-array 100)))
+  (time (do (sieve-boolean-array 1000000) nil))
+  (time (count (loot (sieve-boolean-array 1000000))))
+  (require '[criterium.core :refer [quick-bench with-progress-reporting]])
+  (with-progress-reporting (quick-bench (sieve-boolean-array 1000000))))
+
+(defn sieve-boolean-array-help-compiler
+  "Using a Java array of `boolean`s vector"
+  [^long n]
+  (if (< n 2)
+    []
+    (let [half-n (unchecked-int (bit-shift-right n 1))
+          sqrt-n (unchecked-long (Math/ceil (Math/sqrt (unchecked-double n))))
+          primes (boolean-array half-n)]
+      (loop [p 3]
+        (when (< p sqrt-n)
+          (when-not (aget primes (bit-shift-right p 1))
+            (loop [i (int (bit-shift-right (* p p) 1))]
+              (when (< i half-n)
+                (aset primes i true)
+                (recur (+ i p)))))
+          (recur (+ p 2))))
+      primes)))
+
+(comment
+  (defn loot [primes]
+    (keep-indexed (fn [i v]
+                    (if (zero? i)
+                      2
+                      (when-not v (inc (* i 2)))))
+                  primes))
+  (sieve-boolean-array-help-compiler 1)
+  (loot (sieve-boolean-array-help-compiler 2))
+  (loot (sieve-boolean-array-help-compiler 5))
+  (loot (sieve-boolean-array-help-compiler 10))
+  (loot (sieve-boolean-array-help-compiler 100))
+  (count (loot (sieve-boolean-array-help-compiler 100)))
+  (time (do (sieve-boolean-array-help-compiler 1000000) nil))
+  (time (count (loot (sieve-boolean-array-help-compiler 1000000))))
+  (require '[criterium.core :refer [quick-bench with-progress-reporting]])
+  (with-progress-reporting (quick-bench (sieve-boolean-array-help-compiler 1000000))))
 
 (comment
   (require '[clj-async-profiler.core :as prof])
   (prof/serve-files 8080))
 
-(set! *warn-on-reflection* true)
-(set! *unchecked-math* :warn-on-boxed)
+(set! *warn-on-reflection* false)
+(set! *unchecked-math* false)
 
 (def prev-results
   "Previous results to check against sieve results."
@@ -169,7 +281,23 @@
   {:set {:sieve sieve
          :count-f count
          :threads 1
-         :bits "?"}})
+         :bits "?"}
+   :vector {:sieve sieve-vector
+            :count-f (fn [primes] (count (filter true? primes)))
+            :threads 1
+            :bits "?"}
+   :vector-transient {:sieve sieve-vector-transient
+                      :count-f (fn [primes] (count (filter true? primes)))
+                      :threads 1
+                      :bits "?"}
+   :boolean-array {:sieve sieve-boolean-array
+                   :count-f (fn [primes] (count (filter true? primes)))
+                   :threads 1
+                   :bits 8}
+   :boolean-array-help-compiler {:sieve sieve-boolean-array-help-compiler
+                                 :count-f (fn [primes] (count (filter true? primes)))
+                                 :threads 1
+                                 :bits 8}})
 
 (defn run [{:keys [variant warm-up?]
             :or   {variant :set
@@ -185,4 +313,8 @@
   (run {:warm-up? true})
   (run {:warm-up? false})
   (run {:variant :set :warm-up? true})
-  (run {:variant :vector :warm-up? true}))
+  (run {:variant :vector :warm-up? true})
+  (run {:variant :vector-transient :warm-up? true})
+  (run {:variant :boolean-array :warm-up? true})
+  (run {:variant :boolean-array-help-compiler :warm-up? true})
+  )

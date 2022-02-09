@@ -2,13 +2,23 @@
 
 Viewer material for the live streaming and recording of a different aspects of prime sieving using Clojure. Including performance tuning.
 
+Over the two live streaming sessions we managed to iterate on our base implementation (0) four times and improve performance from 2-3 sieving passes of the first million numbers in five seconds, to nearly 10K passes. Try the `./run.sh` script in this branch and it will give you something like:
+
+```
+0: Passes: 3, Time: 6.551765000, Avg: 2.1839216, Limit: 1000000, Count: 78498, Valid: True
+1: Passes: 58, Time: 5.084850000, Avg: 0.08766983, Limit: 1000000, Count: 78498, Valid: True
+2: Passes: 211, Time: 5.001530000, Avg: 0.023703933, Limit: 1000000, Count: 78498, Valid: True
+3: Passes: 5969, Time: 5.001468000, Avg: 8.379072E-4, Limit: 1000000, Count: 78498, Valid: True
+4: Passes: 9057, Time: 5.001214000, Avg: 5.521932E-4, Limit: 1000000, Count: 421502, Valid: False
+```
+
 <a href="https://youtube.com/playlist?list=PLPb7X_9OOo7pR1CEcR2dA1CfBj8pYta6L">
 <img width="800" src="eratosthenes-repo.png"/>
 </a>
 
-Live Streams:
+Live Streams (now videos):
 * Feb 2, 2022: https://www.youtube.com/watch?v=tRPKSXullYs
-* Feb 9, 2022: TBA
+* Feb 9, 2022: https://www.youtube.com/watch?v=T_wuPrHIupU
 
 Videos:
 * Jan 25, 2022:[ On the Code Again - The Sieve of Erathostenes](https://www.youtube.com/watch?v=jLJgqG3zJ04)
@@ -40,6 +50,7 @@ There are also some Calva [custom commands](https://calva.io/custom-commands/) p
 Check these branches for versions of the sieving code that might have been featured in some live stream or video.
 
 * `live-stream-1`: [Live stream Feb 2, 2022](https://github.com/PEZ/on-the-code-again-eratosthenes/tree/live-stream-1)
+* `live-stream-2`: [Live stream Feb 2, 2022](https://github.com/PEZ/on-the-code-again-eratosthenes/tree/live-stream-2)
 
 ### Using it the Clojure way (from the REPL)
 
@@ -79,7 +90,7 @@ Follow the drag-racing links above to find out what some of that means.
 To run it via docker, first build it, then run it (duh). Here's a one-liner for your convenience:
 
 ```sh
-docker build -t otca-pez-eratosthenes-clojure  . && docker run --rm -it otca-pez-eratosthenes-clojure
+docker build -t otca-sieve-clojure  . && docker run --rm -it otca-sieve-clojure
 ```
 
 The docker script will run `run.sh` without arguments, meaning it will run the drag-race once.
