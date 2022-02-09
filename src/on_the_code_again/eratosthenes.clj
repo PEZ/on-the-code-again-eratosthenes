@@ -169,11 +169,7 @@
   {:set {:sieve sieve
          :count-f count
          :threads 1
-         :bits "?"}
-   :vector {:sieve sieve-vector
-            :count-f (fn [primes] (count (filter true? primes)))
-            :threads 1
-            :bits 1}})
+         :bits "?"}})
 
 (defn run [{:keys [variant warm-up?]
             :or   {variant :set
